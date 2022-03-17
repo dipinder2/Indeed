@@ -8,6 +8,9 @@ namespace Indeed.Models;
 
 public class User:IdentityUser
 {
+    /*
+     * Simple Stuff pass and confirmpasswords should match if not then go back
+     */
     [NotMapped]
     [Required]
     public string Password { get; set; }
@@ -27,12 +30,19 @@ public class User:IdentityUser
      * M is Jobs
      */
     
-    //Many
-    public virtual ICollection<Job>? JobsCreated { get; set; } 
+    /*
+     * One to Many relationship 1 User : many Jobs
+     */
+    public virtual IList<Job>? JobsCreated { get; set; }
     /*
      * Jobs Applied By User M:M
      * Where M is Users &
      * M is Jobs
      */
-    public List<Job>? AppliedJobs { get; set; }
+    public IList<Job>? AppliedJobs { get; set; }
+
+    public override string ToString()
+    {
+        return $"{base.ToString()}, {nameof(Password)}: {Password}, {nameof(ConfirmPassword)}: {ConfirmPassword}";
+    }
 }

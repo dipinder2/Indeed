@@ -37,8 +37,6 @@ namespace Indeed.Controllers;
             _configuration = configuration;
         }
 
-
-
         // GET: api/<UserController>
         [Microsoft.AspNetCore.Mvc.HttpGet]
         [Microsoft.AspNetCore.Mvc.ActionName("Get")]
@@ -131,17 +129,18 @@ namespace Indeed.Controllers;
                         lockoutOnFailure: false);
                     if (result.Succeeded)
                     {
+                        var idforuser = await _userManager.FindByEmailAsync(Input.Email);
                        // create claims details based on the user information
                             var claims = new[] {
                                 new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
-                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                                new Claim(JwtRegisteredClaimNames.Jti, idforuser.Id),
                                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                                 new Claim("Email", Input.Email)
                             };
 
-                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-                            var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                            var token = new JwtSecurityToken(
+                            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                            SigningCredentials signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                            JwtSecurityToken token = new JwtSecurityToken(
                                 _configuration["Jwt:Issuer"],
                                 _configuration["Jwt:Audience"],
                                 claims,
@@ -149,15 +148,10 @@ namespace Indeed.Controllers;
                                 signingCredentials: signIn);
 
                         _logger.LogInformation($"{Input.Email} signed in");
-                        var t = new JwtSecurityTokenHandler().WriteToken(token);
+                        string t = new JwtSecurityTokenHandler().WriteToken(token);
                         CookieOptions co = new CookieOptions();
                         co.Expires = DateTime.UtcNow.Date.AddDays(1);
-
-
                         Response.Cookies.Append("ASPAuthenticationToken",t,co);
-
-                        
-
                         return Ok(t);
                     }
 
@@ -177,7 +171,7 @@ namespace Indeed.Controllers;
             }
 
         }
-
+        
         // GET api/Logout
         [Microsoft.AspNetCore.Mvc.HttpGet]
         [Microsoft.AspNetCore.Mvc.ActionName("Logout")]

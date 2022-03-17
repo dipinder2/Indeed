@@ -21,6 +21,11 @@ public class Job
 
     //1
     public User? User { get; set; }
-    
-    public List<User>? Candidates { get; set; }
+
+    public override string ToString()
+    {
+        return $"{nameof(JobId)}: {JobId}, {nameof(Title)}: {Title}, {nameof(Description)}: {Description}, {nameof(PostedOn)}: {PostedOn}, {nameof(UserId)}: {UserId}";
+    }
+
+    public virtual IList<User>? Candidates { get; set; }
 }
